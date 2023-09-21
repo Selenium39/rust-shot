@@ -18,7 +18,7 @@ implement_vertex!(Vertex, position);
 fn main() {
     let event_loop = glutin::event_loop::EventLoop::new();
     let wb = glutin::window::WindowBuilder::new()
-                .with_transparent(true)
+        .with_transparent(true)
         .with_decorations(false)
         .with_maximized(true);
 
@@ -65,7 +65,7 @@ fn main() {
                 if start_point.is_some() {
                     end_point = Some(current_position);
                 }
-            },
+            }
             Event::WindowEvent {
                 event: WindowEvent::MouseInput { state, button, .. },
                 ..
@@ -77,7 +77,7 @@ fn main() {
                         end_point = Some(current_position);
                     }
                 }
-            },
+            }
             Event::WindowEvent {
                 event: WindowEvent::KeyboardInput {
                     input: keyboard_input, ..
@@ -97,6 +97,8 @@ fn main() {
                         let bottom_right_x = start.x.max(end.x);
                         let bottom_right_y = start.y.max(end.y);
 
+                        println!("top_left_x:{},top_left_y:{},bottom_right_x:{},bottom_right_y:{}", top_left_x, top_left_y, bottom_right_x, bottom_right_y);
+
                         // 计算矩形的宽度和高度
                         let rect_width = (bottom_right_x - top_left_x) as u32;
                         let rect_height = (bottom_right_y - top_left_y) as u32;
@@ -113,9 +115,10 @@ fn main() {
                         }
                         let duration = start_time.elapsed();  // 计算耗时
                         println!("截屏耗时: {:?}", duration);  // 打印耗时
+                        *control_flow = ControlFlow::Exit;
                     }
                 }
-            },
+            }
             _ => (),
         }
 
@@ -141,7 +144,6 @@ fn main() {
                 2.0 * end.x as f32 / width - 1.0,
                 1.0 - 2.0 * end.y as f32 / height,
             ];
-
 
 
             // Draw the red rectangle with correct vertex order
