@@ -1276,6 +1276,7 @@ name = "rust-shot"
 version = "0.0.1"
 dependencies = [
  "glium",
+ "image",
  "screenshots",
  "winit",
 ]

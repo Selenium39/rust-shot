@@ -4,6 +4,9 @@ use winit::{
     event::{ElementState, Event, MouseButton, WindowEvent},
     event_loop::{ControlFlow},
 };
+use winit::event::VirtualKeyCode;
+use screenshots::Screen;
+use std::time::Instant;
 
 #[derive(Copy, Clone)]
 struct Vertex {
@@ -72,6 +75,44 @@ fn main() {
                         start_point = Some(current_position);
                     } else if start_point.is_some() {
                         end_point = Some(current_position);
+                    }
+                }
+            },
+            Event::WindowEvent {
+                event: WindowEvent::KeyboardInput {
+                    input: keyboard_input, ..
+                },
+                ..
+            } => {
+                if let Some(VirtualKeyCode::Return) = keyboard_input.virtual_keycode {  // 检查是否是 Enter 键
+                    if keyboard_input.state == ElementState::Pressed && start_point.is_some() && end_point.is_some() {
+                        let start_time = Instant::now();  // 开始计时
+                        // 这里是截屏的代码
+                        let start = start_point.unwrap();
+                        let end = end_point.unwrap();
+
+                        // 保证 start 是左上角，end 是右下角
+                        let top_left_x = start.x.min(end.x);
+                        let top_left_y = start.y.min(end.y);
+                        let bottom_right_x = start.x.max(end.x);
+                        let bottom_right_y = start.y.max(end.y);
+
+                        // 计算矩形的宽度和高度
+                        let rect_width = (bottom_right_x - top_left_x) as u32;
+                        let rect_height = (bottom_right_y - top_left_y) as u32;
+
+                        if rect_width > 0 && rect_height > 0 {
+                            let screen = Screen::from_point(top_left_x as i32, top_left_y as i32).unwrap();
+                            let image_result = screen.capture_area(top_left_x as i32, top_left_y as i32, rect_width, rect_height);
+
+                            if let Ok(image) = image_result {
+                                image.save(format!("target/rectangle_{}.png", screen.display_info.id)).unwrap();
+                            } else {
+                                eprintln!("截屏失败: {:?}", image_result.err().unwrap());
+                            }
+                        }
+                        let duration = start_time.elapsed();  // 计算耗时
+                        println!("截屏耗时: {:?}", duration);  // 打印耗时
                     }
                 }
             },
