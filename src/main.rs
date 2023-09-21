@@ -85,15 +85,23 @@ fn main() {
         if let Some(start) = start_point {
             let end = end_point.unwrap_or(current_position);
 
+            let window = display.gl_window();
+            let size = window.window().inner_size();
+            let width = size.width as f32;
+            let height = size.height as f32;
+
+
             // Convert window coordinates to OpenGL coordinates
             let start_gl = [
-                2.0 * start.x as f32 / window_dimensions.0 as f32 - 1.0,
-                - (2.0 * start.y as f32 / window_dimensions.1 as f32 - 1.0),
+                2.0 * start.x as f32 / width - 1.0,
+                1.0 - 2.0 * start.y as f32 / height,
             ];
             let end_gl = [
-                2.0 * end.x as f32 / window_dimensions.0 as f32 - 1.0,
-                - (2.0 * end.y as f32 / window_dimensions.1 as f32 - 1.0),
+                2.0 * end.x as f32 / width - 1.0,
+                1.0 - 2.0 * end.y as f32 / height,
             ];
+
+
 
             // Draw the red rectangle with correct vertex order
             let vertices = [
