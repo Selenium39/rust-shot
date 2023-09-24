@@ -20,7 +20,7 @@ fn main() {
     let wb = glutin::window::WindowBuilder::new()
         .with_transparent(true)
         .with_decorations(false)
-        .with_maximized(true);
+        .with_maximized(false);
 
     let cb = glutin::ContextBuilder::new();
     let display = Display::new(wb, cb, &event_loop).unwrap();
@@ -51,7 +51,7 @@ fn main() {
     let mut end_point: Option<PhysicalPosition<f64>> = None;
     let mut current_position: PhysicalPosition<f64> = PhysicalPosition::new(0.0, 0.0);
 
-    let window_dimensions = display.get_framebuffer_dimensions();
+
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
@@ -97,16 +97,23 @@ fn main() {
                         let bottom_right_x = start.x.max(end.x);
                         let bottom_right_y = start.y.max(end.y);
 
-                        println!("top_left_x:{},top_left_y:{},bottom_right_x:{},bottom_right_y:{}", top_left_x, top_left_y, bottom_right_x, bottom_right_y);
-
                         // 计算矩形的宽度和高度
                         let rect_width = (bottom_right_x - top_left_x) as u32;
                         let rect_height = (bottom_right_y - top_left_y) as u32;
 
                         if rect_width > 0 && rect_height > 0 {
-                            let screen = Screen::from_point(top_left_x as i32, top_left_y as i32).unwrap();
-                            let image_result = screen.capture_area(top_left_x as i32, top_left_y as i32, rect_width, rect_height);
 
+                            // 获取窗口在桌面上的位置和放缩比
+                            let window_position = display.gl_window().window().outer_position().unwrap();
+                            let scale_factor = display.gl_window().window().scale_factor();
+
+                            let global_top_left_x = (top_left_x + window_position.x as f64) / scale_factor;
+                            let global_top_left_y = (top_left_y + window_position.y as f64) / scale_factor;
+                            let scaled_rect_width = rect_width as f64 / scale_factor;
+                            let scaled_rect_height = rect_height as f64 / scale_factor;
+
+                            let screen = Screen::from_point(global_top_left_x as i32, global_top_left_y as i32).unwrap();
+                            let image_result = screen.capture_area(global_top_left_x as i32, global_top_left_y as i32, scaled_rect_width as u32, scaled_rect_height as u32);
                             if let Ok(image) = image_result {
                                 image.save(format!("target/rectangle_{}.png", screen.display_info.id)).unwrap();
                             } else {
