@@ -50,6 +50,7 @@ fn main() {
     let mut start_point: Option<PhysicalPosition<f64>> = None;
     let mut end_point: Option<PhysicalPosition<f64>> = None;
     let mut current_position: PhysicalPosition<f64> = PhysicalPosition::new(0.0, 0.0);
+    let mut is_dragging = false;
 
 
 
@@ -62,7 +63,7 @@ fn main() {
                 ..
             } => {
                 current_position = position;
-                if start_point.is_some() {
+                if start_point.is_some() && is_dragging{
                     end_point = Some(current_position);
                 }
             }
@@ -73,8 +74,10 @@ fn main() {
                 if button == MouseButton::Left {
                     if state == ElementState::Pressed {
                         start_point = Some(current_position);
+                        is_dragging = true; 
                     } else if start_point.is_some() {
                         end_point = Some(current_position);
+                        is_dragging = false;
                     }
                 }
             }
