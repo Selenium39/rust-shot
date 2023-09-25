@@ -64,6 +64,7 @@ fn main() {
     let mut current_position: PhysicalPosition<f64> = PhysicalPosition::new(0.0, 0.0);
     let mut is_dragging = false;
     let mut is_moving = false;
+    let mut start_drag_point: Option<PhysicalPosition<f64>> = None; // 追踪开始拖动时的位置
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
@@ -77,16 +78,19 @@ fn main() {
                 if is_dragging && start_point.is_some() {
                     end_point = Some(current_position);
                 } else if is_moving {
-                    let dx = current_position.x - start_point.unwrap().x;
-                    let dy = current_position.y - start_point.unwrap().y;
-                    start_point = Some(PhysicalPosition::new(
-                        start_point.unwrap().x + dx,
-                        start_point.unwrap().y + dy,
-                    ));
-                    end_point = Some(PhysicalPosition::new(
-                        end_point.unwrap().x + dx,
-                        end_point.unwrap().y + dy,
-                    ));
+                    if let Some(start_drag) = start_drag_point {
+                        let dx = current_position.x - start_drag.x;
+                        let dy = current_position.y - start_drag.y;
+                        start_point = Some(PhysicalPosition::new(
+                            start_point.unwrap().x + dx,
+                            start_point.unwrap().y + dy,
+                        ));
+                        end_point = Some(PhysicalPosition::new(
+                            end_point.unwrap().x + dx,
+                            end_point.unwrap().y + dy,
+                        ));
+                    }
+                    start_drag_point = Some(current_position);
                 }
             }
             Event::WindowEvent {
@@ -103,31 +107,23 @@ fn main() {
                             ) {
                                 is_moving = true;
                                 is_dragging = false;
+                                start_drag_point = Some(current_position);
                             } else {
                                 start_point = Some(current_position);
                                 is_dragging = true;
                                 is_moving = false;
+                                start_drag_point = None;
                             }
                         } else {
                             start_point = Some(current_position);
                             is_dragging = true;
                             is_moving = false;
+                            start_drag_point = None;
                         }
                     } else {
-                        if is_moving {
-                            let dx = current_position.x - start_point.unwrap().x;
-                            let dy = current_position.y - start_point.unwrap().y;
-                            start_point = Some(PhysicalPosition::new(
-                                start_point.unwrap().x + dx,
-                                start_point.unwrap().y + dy,
-                            ));
-                            end_point = Some(PhysicalPosition::new(
-                                end_point.unwrap().x + dx,
-                                end_point.unwrap().y + dy,
-                            ));
-                        }
                         is_dragging = false;
                         is_moving = false;
+                        start_drag_point = None;
                     }
                 }
             }
