@@ -21,28 +21,8 @@ fn main() {
     let cb = glutin::ContextBuilder::new();
     let display = Display::new(wb, cb, &event_loop).unwrap();
 
-    let vertex_shader_src = r#"
-        #version 140
-
-        in vec2 position;
-
-        void main() {
-            gl_Position = vec4(position, 0.0, 1.0);
-        }
-    "#;
-
-    let fragment_shader_src = r#"
-        #version 140
-
-        out vec4 color;
-
-        void main() {
-            color = vec4(0.0, 0.0, 0.0, 0.0);
-        }
-    "#;
-
     let mut event_handler = EventHandler::new(&display);
-    let render = Render::new(&display, vertex_shader_src, fragment_shader_src);
+    let render = Render::new(&display);
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;

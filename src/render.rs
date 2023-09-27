@@ -1,9 +1,10 @@
 // render
 
 use glium::{Display, Program, Surface, VertexBuffer, Frame};
-use super::vertex::Vertex; // 导入 Vertex 结构体
+use super::vertex::Vertex;
+// 导入 Vertex 结构体
 use winit::dpi::PhysicalPosition;
-use rusttype::{ Font,Scale, point};
+use rusttype::{Font, Scale, point};
 
 
 pub struct Render {
@@ -11,9 +12,32 @@ pub struct Render {
     program: Program,
 }
 
+// 定义顶点着色器代码为常量
+const VERTEX_SHADER_SRC: &str = r#"
+    #version 140
+
+    in vec2 position;
+
+    void main() {
+        gl_Position = vec4(position, 0.0, 1.0);
+    }
+"#;
+
+// 定义片段着色器代码为常量
+const FRAGMENT_SHADER_SRC: &str = r#"
+    #version 140
+
+    out vec4 color;
+
+    void main() {
+        color = vec4(0.0, 0.0, 0.0, 0.0);
+    }
+"#;
+
 impl Render {
-    pub fn new(display: &Display, vertex_shader_src: &str, fragment_shader_src: &str) -> Self {
-        let program = Program::from_source(display, vertex_shader_src, fragment_shader_src, None)
+    pub fn new(display: &Display) -> Self {
+
+        let program = Program::from_source(display, VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC, None)
             .unwrap();
         Render {
             display: display.clone(),
@@ -42,18 +66,17 @@ impl Render {
                     // Use `v` (a value between 0.0 and 1.0) to determine the text color.
                     // Render the text on the screen using your method of choice.
                     // For this example, we'll just print the coordinates and value.
-                    println!("({}, {}) = {}", gx, gy, v);
                 });
             }
         }
     }
 
 
-    pub fn draw_background(&self,target: &mut Frame) {
+    pub fn draw_background(&self, target: &mut Frame) {
         target.clear_color(0.5, 0.5, 0.5, 0.5); // 半透明的灰色
     }
 
-    pub fn draw_rectangle(&self, start: PhysicalPosition<f64>,end: PhysicalPosition<f64>,target: &mut Frame) {
+    pub fn draw_rectangle(&self, start: PhysicalPosition<f64>, end: PhysicalPosition<f64>, target: &mut Frame) {
         let window = self.display.gl_window();
         let size = window.window().inner_size();
         let width = size.width as f32;
@@ -91,12 +114,11 @@ impl Render {
         target
             .draw(
                 &vertex_buffer,
-                    &indices,
-                    &self.program,
-                    &glium::uniform! {},
-                    &Default::default(),
+                &indices,
+                &self.program,
+                &glium::uniform! {},
+                &Default::default(),
             )
             .unwrap();
-
     }
 }
