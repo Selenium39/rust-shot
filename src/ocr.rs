@@ -17,32 +17,16 @@ struct ParsedResult {
     ParsedText: String,
 }
 
-pub struct OCRProcessor {
-    api_keys: Vec<String>,
-    api_url: String,
-}
+pub struct OCRProcessor;
 
 impl OCRProcessor {
-    pub fn new() -> Self {
-        const DEFAULT_API_KEYS: [&str; 7] = ["fca5393dd988957", "K84490092188957","9f368da3dd88957","1f666673b488957","ec2a41c6a188957","3c5a17b91d88957","d35acb001e88957"];
-        const DEFAULT_API_URL: &str = "https://api.ocr.space/parse/image";
+    const DEFAULT_API_KEYS: [&'static str; 7] = ["fca5393dd988957", "K84490092188957","9f368da3dd88957","1f666673b488957","ec2a41c6a188957","3c5a17b91d88957","d35acb001e88957"];
+    const DEFAULT_API_URL: &'static str = "https://api.ocr.space/parse/image";
 
-        OCRProcessor {
-            api_keys: DEFAULT_API_KEYS.iter().map(|s| s.to_string()).collect(),
-            api_url: DEFAULT_API_URL.to_string(),
-        }
-    }
-
-    pub fn with_keys(api_keys: Vec<String>, api_url: &str) -> Self {
-        OCRProcessor {
-            api_keys,
-            api_url: api_url.to_string(),
-        }
-    }
-
-    pub fn process_image(&self, screenshot_path: &str) -> Result<String, Box<dyn std::error::Error>> {
+    pub fn ocr(screenshot_path: &str) -> Result<String, Box<dyn std::error::Error>> {
         let client = reqwest::blocking::Client::new();
-        let selected_api_key = self.api_keys.choose(&mut rand::thread_rng()).unwrap_or(&self.api_keys[0]);
+        let selected_api_key = OCRProcessor::DEFAULT_API_KEYS.choose(&mut rand::thread_rng()).unwrap_or(&OCRProcessor::DEFAULT_API_KEYS[0]);
+        let api_key_str = *selected_api_key;
 
         // 读取图像文件并进行Base64编码
         let image_bytes = fs::read(screenshot_path)?;
@@ -60,18 +44,19 @@ impl OCRProcessor {
         let base64_prefixed = format!("data:{};base64,{}", content_type, encoded_image);
 
         let params = [
-            ("apikey", selected_api_key.as_str()),
+            ("apikey", api_key_str),
             ("base64Image", &base64_prefixed),
             ("language", "eng"),
             ("isOverlayRequired", "false"),
             ("iscreatesearchablepdf", "true"),
         ];
 
-        let response_body = client.post(&self.api_url).form(&params).send()?.text()?;
+        let response_body = client.post(Self::DEFAULT_API_URL).form(&params).send()?.text()?;
 
         let response: ApiResponse = serde_json::from_str(&response_body)?;
 
         if let Some(parsed_result) = response.ParsedResults.get(0) {
+            println!("Ocr Result:{}",parsed_result.ParsedText);
             Ok(parsed_result.ParsedText.clone())
         } else {
             Err("Failed to get parsed text from OCR".into())

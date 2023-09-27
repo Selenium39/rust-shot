@@ -1,5 +1,5 @@
 mod event_handler;
-mod renderer;
+mod render;
 mod screenshot;
 mod vertex;
 
@@ -7,7 +7,7 @@ mod ocr;
 
 use event_handler::EventHandler;
 use glium::{glutin, Display};
-use renderer::Renderer;
+use render::Render;
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::ControlFlow;
 
@@ -42,10 +42,12 @@ fn main() {
     "#;
 
     let mut event_handler = EventHandler::new(&display);
-    let renderer = Renderer::new(&display, vertex_shader_src, fragment_shader_src);
+    let render = Render::new(&display, vertex_shader_src, fragment_shader_src);
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
+        let mut target = display.draw();
+
 
         match event {
             Event::WindowEvent {
@@ -66,23 +68,24 @@ fn main() {
                 event: WindowEvent::KeyboardInput { input, .. },
                 ..
             } => {
-                if event_handler.handle_keyboard_input(input.virtual_keycode) {
-                    *control_flow = ControlFlow::Exit;
+                if let Some(ocr_result) = event_handler.handle_keyboard_input(input.virtual_keycode) {
+                    let x_position_for_text = 100.0; // Example value, adjust as needed.
+                    let y_position_for_text = 100.0; // Example value, adjust as needed.
+
+                    render.draw_text(&ocr_result, x_position_for_text, y_position_for_text, &mut target);
                 }
             }
 
             _ => (),
         }
 
-        let mut target = display.draw();
-
-        renderer.draw_background(&mut target);
+        render.draw_background(&mut target);
 
         if let Some(start) = event_handler.start_point {
             let end = event_handler
                 .end_point
                 .unwrap_or(event_handler.current_position);
-            renderer.draw_rectangle(start, end, &mut target);
+            render.draw_rectangle(start, end, &mut target);
         }
 
         target.finish().unwrap();

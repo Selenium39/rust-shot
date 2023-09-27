@@ -83,7 +83,7 @@ impl EventHandler {
         }
     }
 
-    pub fn handle_keyboard_input(&mut self, virtual_keycode: Option<VirtualKeyCode>) -> bool {
+    pub fn handle_keyboard_input(&mut self, virtual_keycode: Option<VirtualKeyCode>) -> Option<String> {
         if let Some(VirtualKeyCode::Return) = virtual_keycode {
             if let (Some(start), Some(end)) = (self.start_point, self.end_point) {
 
@@ -115,22 +115,20 @@ impl EventHandler {
                     ) {
                         Ok(screenshot_path) => {
                             // OCR
-                            let ocr_processor = OCRProcessor::new();
-                            let ocr_result = ocr_processor.process_image(&screenshot_path);
-                            match ocr_result {
-                                Ok(text) => println!("OCR 结果: {}", text),
-                                Err(e) => eprintln!("OCR 错误: {}", e),
+                            match OCRProcessor::ocr(&screenshot_path) {
+                                Ok(ocr_result) => return Some(ocr_result),
+                                Err(e) => {
+                                    eprintln!("OCR processing error: {}", e);
+                                    return None;
+                                }
                             }
-                            println!("成功捕获截图!");
                         },
                         Err(e) => eprintln!("Failed to capture screenshot: {}", e),
                     }
-
-                    return true;
                 }
             }
         }
-        false
+        None
     }
 
     fn is_point_inside_rect(
