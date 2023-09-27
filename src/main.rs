@@ -3,6 +3,8 @@ mod renderer;
 mod screenshot;
 mod vertex;
 
+mod ocr;
+
 use event_handler::EventHandler;
 use glium::{glutin, Display};
 use renderer::Renderer;

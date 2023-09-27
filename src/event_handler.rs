@@ -4,6 +4,7 @@ use winit::{
 };
 
 use super::screenshot::Screenshot;
+use crate::ocr::OCRProcessor;
 use glium::Display;
 
 pub struct EventHandler {
@@ -105,14 +106,23 @@ impl EventHandler {
                     let scaled_rect_width = rect_width as f64 / scale_factor;
                     let scaled_rect_height = rect_height as f64 / scale_factor;
 
-                    // Capture the screenshot
+                    // 截图
                     match Screenshot::capture(
                         global_top_left_x,
                         global_top_left_y,
                         scaled_rect_width as u32,
                         scaled_rect_height as u32,
                     ) {
-                        Ok(_) => println!("Screenshot captured successfully!"),
+                        Ok(screenshot_path) => {
+                            // OCR
+                            let ocr_processor = OCRProcessor::new();
+                            let ocr_result = ocr_processor.process_image(&screenshot_path);
+                            match ocr_result {
+                                Ok(text) => println!("OCR 结果: {}", text),
+                                Err(e) => eprintln!("OCR 错误: {}", e),
+                            }
+                            println!("成功捕获截图!");
+                        },
                         Err(e) => eprintln!("Failed to capture screenshot: {}", e),
                     }
 
