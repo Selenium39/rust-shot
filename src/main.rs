@@ -50,6 +50,9 @@ fn main() {
                 ..
             } => {
                 if let Some(ocr_result) = event_handler.handle_keyboard_input(input.virtual_keycode) {
+                    let gl_window = display.gl_window();
+                    let window = gl_window.window();
+                    window.set_visible(false);
                     *control_flow = ControlFlow::Exit;
                     render.draw_ocr_result(ocr_result);
                 }
