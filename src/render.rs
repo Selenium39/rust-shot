@@ -4,6 +4,8 @@ use glium::{Display, Program, Surface, VertexBuffer, Frame};
 use super::vertex::Vertex;
 // 导入 Vertex 结构体
 use winit::dpi::PhysicalPosition;
+use fltk::{app, button::Button, frame::Frame as FltkFrame, window::Window};
+use fltk::prelude::*;
 
 
 pub struct Render {
@@ -48,6 +50,17 @@ impl Render {
     pub fn draw_background(&self, target: &mut Frame) {
         target.clear_color(0.5, 0.5, 0.5, 0.5); // 半透明的灰色
     }
+
+    pub fn draw_ocr_result(&self,content: String){
+        let app = app::App::default().with_scheme(app::Scheme::Gtk);
+        let mut wind = Window::new(100, 100, 400, 300, "Chat Window");
+        let mut frame = FltkFrame::new(0, 0, 400, 200, "");
+        frame.set_label(&content);
+        wind.end();
+        wind.show();
+        app.run().unwrap();
+    }
+
 
     pub fn draw_rectangle(&self, start: PhysicalPosition<f64>, end: PhysicalPosition<f64>, target: &mut Frame) {
         let window = self.display.gl_window();
