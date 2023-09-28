@@ -4,7 +4,7 @@ use glium::{Display, Program, Surface, VertexBuffer, Frame};
 use super::vertex::Vertex;
 // 导入 Vertex 结构体
 use winit::dpi::PhysicalPosition;
-use fltk::{app, button::Button, frame::Frame as FltkFrame, window::Window};
+use fltk::{app,  text::{TextBuffer, TextDisplay}, frame::Frame as FltkFrame, window::Window};
 use fltk::prelude::*;
 
 
@@ -53,9 +53,18 @@ impl Render {
 
     pub fn draw_ocr_result(&self, content: String, position: (i32, i32), size: (i32, i32)) {
         let app = app::App::default().with_scheme(app::Scheme::Gtk);
-        let mut wind = Window::new(position.0, position.1, size.0, size.1, "OCR Result");
-        let mut frame = FltkFrame::new(0, 0, size.0, size.1, "");
-        frame.set_label(&content);
+        let mut wind = Window::new(position.0, position.1, size.0, size.1, "Chat");
+
+        let mut buffer = TextBuffer::default();
+        let mut display = TextDisplay::new(0, 0, size.0, size.1, "");
+        display.set_buffer(Some(buffer.clone()));
+
+        // OCR result as the first chat message
+        buffer.append(&format!("RustShot: {}\n", content));
+
+        // TODO: You can add more chat messages here
+        buffer.append("User: Hello!\n");
+
         wind.end();
         wind.show();
         app.run().unwrap();

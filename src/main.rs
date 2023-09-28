@@ -65,11 +65,16 @@ fn main() {
                         (size.height as f64 / scale_factor) as u32
                     );
 
+                    let adjusted_position = (
+                        (position.x as f64 / scale_factor) as i32,
+                        (position.x as f64 / scale_factor) as i32
+                    );
+
                     window.set_visible(false);
 
                     *control_flow = ControlFlow::Exit;
 
-                    render.draw_ocr_result(ocr_result, (position.x, position.y), (adjusted_size.0 as i32, adjusted_size.1 as i32));
+                    render.draw_ocr_result(ocr_result, (adjusted_position.0, adjusted_position.1), (adjusted_size.0 as i32, adjusted_size.1 as i32));
                 }
             }
 
