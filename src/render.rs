@@ -44,31 +44,6 @@ impl Render {
         }
     }
 
-    pub fn draw_text(&self, text: &str, x: f32, y: f32, target: &mut Frame) {
-        // 1. Load the font. This can be a TTF or OTF font file.
-        let font_data = include_bytes!("../assets/font/WenQuanYiMicroHei.ttf");
-        let font = Font::try_from_bytes(font_data as &[u8]).expect("Error constructing Font");
-
-        // 2. Set the size and position of the text.
-        let scale = Scale::uniform(24.0);
-        let start = point(x, y);
-
-        // 3. Create an image representing the text.
-        for glyph in font.layout(text, scale, start) {
-            if let Some(bounding_box) = glyph.pixel_bounding_box() {
-                glyph.draw(|gx, gy, v| {
-                    // Convert glyph coordinates to screen coordinates
-                    let gx = gx as i32 + bounding_box.min.x;
-                    let gy = gy as i32 + bounding_box.min.y;
-
-                    // Use `v` (a value between 0.0 and 1.0) to determine the text color.
-                    // Render the text on the screen using your method of choice.
-                    // For this example, we'll just print the coordinates and value.
-                });
-            }
-        }
-    }
-
 
     pub fn draw_background(&self, target: &mut Frame) {
         target.clear_color(0.5, 0.5, 0.5, 0.5); // 半透明的灰色
