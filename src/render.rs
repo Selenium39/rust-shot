@@ -4,7 +4,7 @@ use glium::{Display, Program, Surface, VertexBuffer, Frame};
 use super::vertex::Vertex;
 // 导入 Vertex 结构体
 use winit::dpi::PhysicalPosition;
-use fltk::{app,  text::{TextBuffer, TextDisplay}, frame::Frame as FltkFrame, window::Window};
+use fltk::{app,  text::{TextBuffer, TextDisplay}, frame::Frame as FltkFrame, window::Window,button::Button, input::Input};
 use fltk::prelude::*;
 
 
@@ -56,14 +56,22 @@ impl Render {
         let mut wind = Window::new(position.0, position.1, size.0, size.1, "Chat");
 
         let mut buffer = TextBuffer::default();
-        let mut display = TextDisplay::new(0, 0, size.0, size.1, "");
+        let mut display = TextDisplay::new(0, 0, size.0, size.1 - 50, "");
         display.set_buffer(Some(buffer.clone()));
+
+        let mut input = Input::new(0, size.1 - 50, size.0 - 100, 50, "");
+        let mut submit_btn = Button::new(size.0 - 100, size.1 - 50, 100, 50, "Send");
 
         // OCR result as the first chat message
         buffer.append(&format!("RustShot: {}\n", content));
 
-        // TODO: You can add more chat messages here
-        buffer.append("User: Hello!\n");
+        submit_btn.set_callback(move |_| {
+            let user_input = input.value();
+            if !user_input.is_empty() {
+                buffer.append(&format!("User: {}\n", user_input));
+                input.set_value("");  // clear the input field after sending the message
+            }
+        });
 
         wind.end();
         wind.show();
