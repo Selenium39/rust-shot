@@ -52,9 +52,24 @@ fn main() {
                 if let Some(ocr_result) = event_handler.handle_keyboard_input(input.virtual_keycode) {
                     let gl_window = display.gl_window();
                     let window = gl_window.window();
+
+                    // 获取窗口的位置和大小
+                    let position = window.outer_position().unwrap();
+                    let size = window.outer_size();
+                    // 获取 DPI 缩放因子
+                    let scale_factor = window.scale_factor();
+
+                    // 考虑 DPI 缩放因子来调整窗口大小
+                    let adjusted_size = (
+                        (size.width as f64 / scale_factor) as u32,
+                        (size.height as f64 / scale_factor) as u32
+                    );
+
                     window.set_visible(false);
+
                     *control_flow = ControlFlow::Exit;
-                    render.draw_ocr_result(ocr_result);
+
+                    render.draw_ocr_result(ocr_result, (position.x, position.y), (adjusted_size.0 as i32, adjusted_size.1 as i32));
                 }
             }
 
