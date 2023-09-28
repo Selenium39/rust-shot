@@ -4,7 +4,6 @@ use glium::{Display, Program, Surface, VertexBuffer, Frame};
 use super::vertex::Vertex;
 // 导入 Vertex 结构体
 use winit::dpi::PhysicalPosition;
-use rusttype::{Font, Scale, point};
 
 
 pub struct Render {
@@ -44,7 +43,6 @@ impl Render {
             program,
         }
     }
-
 
     pub fn draw_text(&self, text: &str, x: f32, y: f32, target: &mut Frame) {
         // 1. Load the font. This can be a TTF or OTF font file.

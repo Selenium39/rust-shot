@@ -49,10 +49,7 @@ fn main() {
                 ..
             } => {
                 if let Some(ocr_result) = event_handler.handle_keyboard_input(input.virtual_keycode) {
-                    let x_position_for_text = 100.0; // Example value, adjust as needed.
-                    let y_position_for_text = 100.0; // Example value, adjust as needed.
-
-                    render.draw_text(&ocr_result, x_position_for_text, y_position_for_text, &mut target);
+                    // OCR结果
                 }
             }
 
