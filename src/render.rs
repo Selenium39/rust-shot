@@ -1,11 +1,13 @@
 // render
 
+use std::sync::Arc;
 use glium::{Display, Program, Surface, VertexBuffer, Frame};
 use super::vertex::Vertex;
 // 导入 Vertex 结构体
 use winit::dpi::PhysicalPosition;
 use fltk::{app,  text::{TextBuffer, TextDisplay}, frame::Frame as FltkFrame, window::Window,button::Button, input::Input};
 use fltk::prelude::*;
+use crate::chat::ChatService;
 
 
 pub struct Render {
@@ -54,24 +56,39 @@ impl Render {
     pub fn draw_ocr_result(&self, content: String, position: (i32, i32), size: (i32, i32)) {
         let app = app::App::default().with_scheme(app::Scheme::Gtk);
         let mut wind = Window::new(position.0, position.1, size.0, size.1, "Chat");
-
         let mut buffer = TextBuffer::default();
         let mut display = TextDisplay::new(0, 0, size.0, size.1 - 50, "");
         display.set_buffer(Some(buffer.clone()));
-
         let mut input = Input::new(0, size.1 - 50, size.0 - 100, 50, "");
         let mut submit_btn = Button::new(size.0 - 100, size.1 - 50, 100, 50, "Send");
+        let chat_service = Arc::new(ChatService::new());
+
 
         // OCR result as the first chat message
         buffer.append(&format!("RustShot: {}\n", content));
 
-        submit_btn.set_callback(move |_| {
-            let user_input = input.value();
-            if !user_input.is_empty() {
-                buffer.append(&format!("User: {}\n", user_input));
-                input.set_value("");  // clear the input field after sending the message
+        submit_btn.set_callback({
+            let chat_service = Arc::clone(&chat_service);
+            move |_| {
+                let user_input = input.value();
+                if !user_input.is_empty() {
+                    buffer.append(&format!("User: {}\n", user_input));
+                    input.set_value("");  // 清除输入字段
+
+                    let query = format!("{} {}", content, user_input);  // 将 OCR 结果和用户输入合并为查询
+                    match chat_service.send_query(query) {
+                        Ok(response) => {
+                            println!("RustShot answer:{}",response.answer);
+                            buffer.append(&format!("RustShot: {}\n", response.answer));
+                        }
+                        Err(e) => {
+                            eprintln!("Error sending query: {}", e);
+                        }
+                    }
+                }
             }
         });
+
 
         wind.end();
         wind.show();

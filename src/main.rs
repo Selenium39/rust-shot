@@ -5,12 +5,15 @@ mod vertex;
 
 mod ocr;
 
+mod chat;
+
 use event_handler::EventHandler;
 use glium::{glutin, Display};
 use render::Render;
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::ControlFlow;
 use glium::Surface;
+use chat::ChatService;
 
 fn main() {
     let event_loop = glutin::event_loop::EventLoop::new();
